@@ -17,11 +17,9 @@ from django.conf import settings
 from django.conf.urls import include, url
 from django.conf.urls.static import static
 from django.contrib import admin
-from Grundgeruest.views import TemplateMitMenue, ListeMitMenue, aus_datei_mitglieder_einlesen, db_runterladen, zahlen, ListeAktiveMitwirkende
-from Grundgeruest.forms import Anmeldeformular
+from Grundgeruest.views import TemplateMitMenue, ListeMitMenue, db_runterladen, zahlen, ListeAktiveMitwirkende
 from Grundgeruest.models import Mitwirkende
 import Grundgeruest.userena_urls as userena_urls
-from userena.views import signup
 from Veranstaltungen.urls import *
 from Veranstaltungen.models import Studiumdings
 from Veranstaltungen.views import studiumdings_detail, vortrag
@@ -37,34 +35,28 @@ urlpatterns = [
     url(r'^mitwirkende/',
         ListeAktiveMitwirkende.as_view(),
         name='gast_mitwirkende'),
-    url(r'^studium/$', 
+    url(r'^studium/$',
         ListeMitMenue.as_view(
-            model=Studiumdings,
+            model=Studiumdings, # Achtung, es werden nur die studiendinger mit reihenfolge<>0 angezeigt, darüber auskommentieren!
     	    template_name='Veranstaltungen/liste_studien.html',
             url_hier='/studium/',
 	        context_object_name = 'studien',
         ),
         name='liste_studium'),
-    url(r'^studium/(?P<slug>[-\w]+)/$', 
-        studiumdings_detail, 
+    url(r'^studium/(?P<slug>[-\w]+)/$',
+        studiumdings_detail,
         name='studium_detail'),
-    url(r'^vortrag/', vortrag, name='vortrag'), 
-    url(r'^nutzer/eintragen/$',
-        signup,
-        {'signup_form': Anmeldeformular}),
-    url(r'^nutzer/e$',
-        aus_datei_mitglieder_einlesen,
-        name='mitglieder_einlesen'),
+    url(r'^vortrag/', vortrag, name='vortrag'),
     url(r'^nutzer/', include(userena_urls)),
     url(r'^warenkorb/', include('Produkte.urls')),
     url(r'^veranstaltungen/', include(
-        veranstaltungen_urls, 
+        veranstaltungen_urls,
         namespace='Veranstaltungen')),
     url(r'^salon', include(
         salons_urls,
         namespace='Veranstaltungen')),
     url(r'^seminar', include(
-        seminare_urls, 
+        seminare_urls,
         namespace='Veranstaltungen')),
     url(r'^buecher/', include('Bibliothek.urls')),
     url(r'^scholien', include('Scholien.urls')),
@@ -91,4 +83,5 @@ urlpatterns = [
         db_runterladen,
         name='bitte_bald_loeschen'),
     url(r'^', include('Grundgeruest.urls')),
+    url(r'^nimda/', include('Workflow.urls')),
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

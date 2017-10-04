@@ -1,9 +1,19 @@
 from django.shortcuts import render
 from django.http import HttpResponseRedirect
 import re, os
-from .models import Buch
+from . import models
 from django.db import transaction
+import sqlite3 as lite
 from seite.settings import BASE_DIR
+from Grundgeruest.views import ListeMitMenue
+
+def liste_buecher(request):
+    return ListeMitMenue.as_view(
+        template_name='Bibliothek/buecher_alt.html',
+        model=models.Buch,
+        context_object_name='buecher',
+        paginate_by = 80)(request, page=request.GET.get('seite')) 
+
 
 attributnamen = {
     'author': 'autor',
@@ -34,7 +44,7 @@ def aus_datei_einlesen(request, exlibris=''):
         matches = [teilsplit.match(zeile) for zeile in zeilen[1:]]
         daten = dict([match.groups() for match in matches if match])
     
-        buch = Buch.objects.create(bezeichnung=bezeichnung)
+        buch = models.Buch.objects.create(bezeichnung=bezeichnung)
         buch.exlibris = exlibris
         for key in daten:
             if key in attributnamen:
@@ -42,3 +52,4 @@ def aus_datei_einlesen(request, exlibris=''):
         buch.save()
         
     return HttpResponseRedirect('/warenkorb/')
+

@@ -1,8 +1,10 @@
 from django.shortcuts import get_object_or_404, render
 from django.core.urlresolvers import reverse
-from django.http import HttpResponse
+from django.http import HttpResponse, HttpResponseRedirect
+from django.contrib import messages
 
 from .models import *
+from Produkte.models import Kauf
 from Grundgeruest.views import ListeMitMenue, DetailMitMenue, TemplateMitMenue
 
 
@@ -22,7 +24,7 @@ def liste_veranstaltungen(request, art):
     
     return ListeArt.as_view(
         template_name=template_name,
-        art=art)(request)
+        art=art)(request, page=request.GET.get('seite'))
     
 class ListeArt(ListeAlle):
     """ Klasse zur Darstellung der Seminare oder Salons
@@ -105,82 +107,37 @@ def vortrag(request):
     else:
         extra_context = { 'vortrag': vortrag, 'url_hier': '/vortrag/'}
     return TemplateMitMenue.as_view(
-        template_name='Gast/vortrag.html', 
+        template_name='Veranstaltungen/vortrag.html', 
         extra_context=extra_context)(request)
 
+
+def livestream(request):
+    """ soll das nächste salon-Objekt ans livestream-Template geben, falls 
+    Termin nah genug und link aktiviert. Sonst später Extraseite, erstmal 
+    Link auf nächsten Salon und message, dass zu lange hin """
     
+    artsalon = ArtDerVeranstaltung.objects.filter(bezeichnung='Salon')
+    
+    try:
+        salon = Veranstaltung.objects.filter(
+            datum__gte=date.today()).filter(
+            art_veranstaltung=artsalon).order_by('datum')[0]
+    except IndexError:
+        messages.warning(request, ('Momentan sind die nächsten Salons noch nicht eingetragen.'))
+        return HttpResponseRedirect("/salons/")
+    
+    from Produkte.templatetags import produkttags
+    if not produkttags.ob_livestream_zeigen(salon, request.user.my_profile):
+        messages.warning(request, ('Zum nächsten Salon gibt es noch keinen Livestream!'))
+    
+    return HttpResponseRedirect("/salon/" + salon.slug)
+
+
+from Grundgeruest.daten_einlesen import veranstaltungen_aus_db
 def daten_einlesen(request):
     """ wird von url aufgerufen und ruft standalone-Fkt auf """
     aus_alter_db_einlesen()
     return HttpResponseRedirect('/veranstaltungen')
     
 
-def aus_alter_db_einlesen():
-    """ liest veranstaltungen aus alter db (als .sqlite exportiert) aus 
-    !! Achtung, löscht davor die aktuellen Einträge !! """
-    
-    from django.db import transaction
-    import sqlite3 as lite
-    from django.conf import settings
-    import os, pdb
-    from django.http import HttpResponseRedirect
-    
-    # Seminare, Salons, Vorlesungen, Vorträge einlesen
-    Veranstaltung.objects.all().delete()
-    
-    con = lite.connect(os.path.join(settings.BASE_DIR, 'alte_db.sqlite3'))
-    with con:
-        con.row_factory = lite.Row
-        cur = con.cursor()
-        cur.execute("SELECT * FROM produkte WHERE type in ('salon'," + 
-            " 'seminar', 'media-vortrag', 'media-vorlesung');")
 
-        zeilen = [dict(zeile) for zeile in cur.fetchall()]
-    
-    arten = {'salon': ArtDerVeranstaltung.objects.get(
-            bezeichnung='Salon'),
-        'seminar': ArtDerVeranstaltung.objects.get(
-            bezeichnung='Seminar'),
-        'media-vortrag': ArtDerVeranstaltung.objects.get(
-            bezeichnung='Vortrag'),
-        'media-vorlesung': ArtDerVeranstaltung.objects.get(
-            bezeichnung='Vorlesung'),}
-    
-    with transaction.atomic():
-        for zeile in zeilen:
-            if zeile['type'] in ['seminar', 'salon']:
-                datum = zeile['start'] or '1111-01-01 00-00'
-            else:
-                if zeile['last_donation'] in ['0000-00-00 00:00:00', None]:
-                    datum = '1111-01-01 00-00'
-                else:
-                    datum = zeile['last_donation']
-                    
-            datum = datum.split(' ')[0]
-            v = Veranstaltung.objects.create(
-                bezeichnung=zeile['title'],
-                slug=zeile['id'],
-                beschreibung=zeile['text'],
-                art_veranstaltung=arten[zeile['type']],
-                datum=datum, 
-                link=zeile['livestream'])
-
-    # Studiendinger einlesen
-    Studiumdings.objects.all().delete()
-    
-    con = lite.connect(os.path.join(settings.BASE_DIR, 'alte_db.sqlite3'))
-    with con:
-        con.row_factory = lite.Row
-        cur = con.cursor()
-        cur.execute("SELECT * FROM produkte WHERE type='programm';")
-
-        zeilen = [dict(zeile) for zeile in cur.fetchall()]
-        
-    with transaction.atomic():
-        for zeile in zeilen:
-            dings = Studiumdings.objects.create(
-                bezeichnung=zeile['title'],
-                slug=zeile['id'],
-                beschreibung1=zeile['text'],
-                beschreibung2=zeile['text2'],
-                preis_teilnahme=zeile['price'],)

@@ -3,8 +3,12 @@ from django.contrib.auth import views as auth_views
 
 from userena import settings as userena_settings
 from userena import views as userena_views
+from . import views as grundgeruest_views
 from userena.compat import auth_views_compat_quirks, password_reset_uid_kwarg
 
+from .forms import Anmeldeformular, ZahlungFormular
+from userena.forms import EditProfileForm
+from .views import anmelden
 
 def merged_dict(dict_a, dict_b):
     """Merges two dicts and returns output. It's purpose is to ease use of
@@ -17,10 +21,12 @@ urlpatterns = [
     # Signup, signin and signout
     url(r'^eintragen/$',
        userena_views.signup,
+       {'signup_form': Anmeldeformular},
        name='userena_signup'),
     url(r'^anmelden/$',
-       userena_views.signin,
-       name='userena_signin'),
+        anmelden,
+    #    userena_views.signin,
+    name='userena_signin'),
     url(r'^abmelden/$',
        userena_views.signout,
        name='userena_signout'),
@@ -98,12 +104,14 @@ urlpatterns = [
 
     # Edit profile
     url(r'^(?P<username>[\@\.\w-]+)/edit/$',
-       userena_views.profile_edit,
+       grundgeruest_views.profile_edit,
+       {'template_name': 'userena/profile_form.html'},
        name='userena_profile_edit'),
 
     # View profiles
     url(r'^(?P<username>(?!(signout|signup|signin)/)[\@\.\w-]+)/$',
-       userena_views.profile_detail,
+       grundgeruest_views.profile_detail,
+       {'template_name': userena_settings.USERENA_PROFILE_DETAIL_TEMPLATE},
        name='userena_profile_detail'),
     url(r'^page/(?P<page>[0-9]+)/$',
        userena_views.ProfileListView.as_view(),

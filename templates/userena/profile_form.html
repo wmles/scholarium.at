@@ -1,0 +1,71 @@
+{% extends 'userena/base_userena.html' %}
+{% load i18n %}
+
+{% block title %}Nutzerprofil Einstellungen{% endblock %}
+
+{% block content_title %}<h2>{% blocktrans with profile.user.username as username %}Account &raquo; {{ username }} {% endblocktrans %}spam</h2>{% endblock %}
+
+{% block content %}
+
+<div class="profil">
+  <h1>Profil</h1>
+    {% if request.user.my_profile.datum_ablauf %} <p>Ihr Unterst&uuml;tzer-Zugang l&auml;uft noch bis zum {{ request.user.my_profile.datum_ablauf }}<br><br>
+    (Verl&auml;ngerung um ein Jahr nach Spendeneingang.)<br><br>
+    <a href="/spende">&rarr; Unterst&uuml;tzung erneuern.</a>
+  </p> {% endif %}
+</div>
+
+<div class="separator">
+  <h2>Ihre Daten ändern</h2>
+</div>
+
+<div class="profil wrapper"><form action="" enctype="multipart/form-data" method="post">
+  <div class="center">
+  {% csrf_token %}
+  {{ form.email.errors }}
+  {{ form.email.label_tag }}
+  {{ form.email }}
+  <br><br>
+  {{ form.anrede.errors }}
+  {{ form.anrede.label_tag }}
+  {{ form.anrede }}
+  <br>
+  {{ form.vorname.errors }}
+  {{ form.vorname.label_tag }}
+  {{ form.vorname }}
+  <br>
+  {{ form.nachname.errors }}
+  {{ form.nachname.label_tag }}
+  {{ form.nachname }}
+  <br>
+  {{ form.tel.errors }}
+  {{ form.tel.label_tag }}
+  {{ form.tel }}
+  <br>
+  {{ form.firma.errors }}
+  {{ form.firma.label_tag }}
+  {{ form.firma }}
+  <br>
+  {{ form.strasse.errors }}
+  {{ form.strasse.label_tag }}
+  {{ form.strasse }}
+  <br>
+  {{ form.plz.errors }}
+  {{ form.plz.label_tag }}
+  {{ form.plz }}
+  <br>
+  {{ form.ort.errors }}
+  {{ form.ort.label_tag }}
+  {{ form.ort }}
+  <br>
+  {{ form.land.errors }}
+  {{ form.land.label_tag }}&nbsp
+  {{ form.land }}
+  <br>
+  <input type="submit" value="{% trans "Save changes" %}" />
+</div>
+</form>
+<form action="{% url 'userena_password_change' username=request.user.username %}"><input type="submit" value="{% trans "Change password" %}" /></form>
+
+</div>
+{% endblock %}

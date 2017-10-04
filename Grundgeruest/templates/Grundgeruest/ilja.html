@@ -2,12 +2,14 @@
 <!doctype html5>
 <html lang="de">
   <head>
+    {% block head %}
     <meta charset="utf-8">
     <title>{% block title %}Willkommen{% endblock %} | scholarium</title>
     <link rel="shortcut icon" href="{% static 'img/favicon.ico' %}">
     <link rel="stylesheet" type="text/css" href="{% static 'ilja.css' %}">
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.1.1/jquery.min.js"></script>
     <script src="{% static 'warenkorb/skripte_warenkorb.js' %}"></script>
+    {% endblock head %}
   </head>
   <body>
     <header class="header">
@@ -24,9 +26,18 @@
     {% endblock menueleiste %}
     </header>
     <div class="inhalt">
+      {% if messages %}
+        <div class="basket_message">
+        {% for message in messages %}
+          <i>{{ message }}</i><br>
+        {% endfor %}
+        </div>
+      {% endif %}
       {% block content %}
         <div style="padding: 0 25%; align-content: center;">{% lorem 7 p %}</div>
       {% endblock content %}
+      {% block modals %}
+      {% endblock modals %}
     </div>
     {% include "Grundgeruest/footer_inhalt.html" %}
   </body>

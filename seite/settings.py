@@ -37,7 +37,7 @@ SECRET_KEY = '_h!7u1tm_6)ncy=8mv24yocp_@b^)l!l_yvo=9*v=afg_l9vr#'
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['*']
 
 
 # Application definition
@@ -67,6 +67,7 @@ INSTALLED_APPS = [
     'django.contrib.humanize',
     'easycart',
     'django_countries',
+    'django_cron',
 ]
 
 MIDDLEWARE_CLASSES = [
@@ -75,10 +76,10 @@ MIDDLEWARE_CLASSES = [
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
-    'django.contrib.auth.middleware.SessionAuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
+
 
 ROOT_URLCONF = 'seite.urls'
 
@@ -119,6 +120,7 @@ ANONYMOUS_USER_ID = -1
 
 USERENA_WITHOUT_USERNAMES = True
 USERENA_SIGNIN_REDIRECT_URL = '/nutzer/%(username)s/'
+USERENA_REGISTER_PROFILE = False 
 LOGIN_URL = '/nutzer/anmelden/'
 LOGOUT_URL = '/nutzer/abmelden/'
 
@@ -175,7 +177,7 @@ AUTH_PASSWORD_VALIDATORS = [
     },
 ]
 
-
+ 
 # Internationalization
 # https://docs.djangoproject.com/en/1.9/topics/i18n/
 
@@ -204,6 +206,7 @@ STATICFILES_DIRS = [
 
 try:
     MEDIA_ROOT = '/home/scholarium/scholarium_daten/'
+    os.chdir(MEDIA_ROOT)
 except FileNotFoundError:
     MEDIA_ROOT = os.path.join(DATA_DIR, 'media')
 
@@ -217,9 +220,21 @@ EMAIL_USE_TLS = True
 EMAIL_HOST = 'smtp.gmail.com'
 EMAIL_PORT = 587
 EMAIL_HOST_USER = 'iljasseite@gmail.com'
-EMAIL_HOST_PASSWORD = 'iljailja'
+EMAIL_HOST_PASSWORD = 'ad8F9hnv2Jjsk4Rg5ns'
+DEFAULT_TO_EMAILS = ['mb@scholarium.at', 'ilja1988@gmail.com']
 
 # Paypal
 PAYPAL_MODE = 'sandbox'   # sandbox or live
-PAYPAL_CLIENT_ID = 'AVoRdNuyWNkIdTV7QnEVrrljx-S7ATX9Ny6W6wIGi8MScRPaqeTxX3Ubark1OkgepNVXJ77ifEv1ZQ5a' #get_env_variable('PAYPAL_CLIENT_ID')
-PAYPAL_CLIENT_SECRET = 'EE4pF1UU-v6pUDjR5W06B68mz7uH4qXHxyqrZ0XYyCu7miVKauxytlTGRt83pdytjLT-zvSywojaskiS' #get_env_variable('PAYPAL_CLIENT_SECRET')
+PAYPAL_CLIENT_ID = 'AasKeJoihSdkebF5q7QCuubWoIpnlZiV5vfklRN6onwfU9AJYOwXJ5HvDO-PFghOdi26gGzzpc38qb7B' #get_env_variable('PAYPAL_CLIENT_ID')
+PAYPAL_CLIENT_SECRET = 'EI3An34Ea1-D5oKS59QwAI0mGu8ELZRT3m9YxPKfRCdoGlqlYL3Oqc8jlelBMpebtxXsKBjO4GCZmnOz' #get_env_variable('PAYPAL_CLIENT_SECRET')
+
+HOSTNAME = 'https://scholarium.at'
+
+## Cron
+CRON_CLASSES = [
+    # 'seite.cron.cron_t2sql',
+    'seite.cron.cron_publish',
+]
+
+# Release period in days
+RELEASE_PERIOD = 6

@@ -243,7 +243,7 @@ div.basket_message {
 	background-color: #DFF0D8;
 	font-size: 16pt;
 	text-align: center;
-	font-family: "Garamond", Georgia, Times, serif;	
+	font-family: "Garamond", Georgia, Times, serif;
 }
 
 div.basket_message a {
@@ -462,6 +462,11 @@ img.dropdown_coin {
 .container {
     width: 60%;
     padding: 50px 20%;
+}
+
+.container_breit {
+	width: 70%;
+	padding: 50px 15%;
 }
 
 table {
@@ -714,10 +719,10 @@ td {
 	color: #fff;
 	border: 0;
 	border-radius: 2px;
-	margin-top: 4px;
-    margin-bottom: 8px;
-	min-width: 200px;
-	height: 50px;
+	/*margin-top: 4px;*/
+    /*margin-bottom: 8px;*/
+	min-width: 150px;
+	height: 40px;
 	font-size: 16pt;
 	font-family: "Futura Book", Helvetica, Arial, serif;
 	box-shadow: 0px 1px 1px 0px rgba(0, 0, 0, 0.12), 0px 0px 1px 0px rgba(0, 0, 0, 0.24);
@@ -854,6 +859,19 @@ div.scholienbuechlein > div {
 	margin: 0px 0 0px 0;
 }
 
+.buecher_tabelle td {
+	vertical-align: middle;
+	padding: 10px;
+	margin: 10px;
+	font-family: "Garamond", Georgia, Times, sans-serif;
+}
+
+.buecher_korb td {
+	border: 0;
+	padding: 10px;
+	padding-bottom: 0;
+}
+
 .buecher_img {
 	float: left;
 	text-align: center;
@@ -894,8 +912,10 @@ div.scholienbuechlein > div {
 }
 
 .buecher-coin-span__img {
-	width: 1.4em;
-	margin: 0.5em  0 -.4em 0.5em !important;
+	display: block;
+	width: 2.5em;
+	margin: 0;
+	/*margin: 0.5em  0 -.4em 0.5em !important;*/
 }
 
 .schriften_type {
@@ -1050,7 +1070,7 @@ p.linie img {
 
 .salon_content img {
 	text-align: center;
-	margin: 30px 0;
+	/*margin: 30px 0;*/
 }
 
 .salon_content p {
@@ -1128,19 +1148,21 @@ p.linie img {
 }
 
 .input-select {
-	padding: 10px;
-    padding-top: 6px;
+	padding: 3px;
+    /*padding-top: 6px;*/
 	font-size: 14pt;
-	height: 50px;
+	/*height: 50px;*/
 }
 
 .coin-span {
+	display: inline-block;
 	font-size: 18pt;
+	/*padding-top: 0.5em;*/
 }
 
 .coin-span__img {
-	width: 1.4em;
-	margin: 0.5em  0 -.4em 0.5em !important;
+	vertical-align: middle;
+	width: 1.5em;
 }
 
 
@@ -1787,6 +1809,83 @@ div.warenkorb_veranstaltung form input {
     border-bottom: 1px dotted rgb(46,74,98);
 }
 
+/*==================================================*/
+/*                   Bestellübersicht                    		*/
+/*==================================================*/
+
+.bestellung_item {
+	width: 100%;
+	font-size: 14pt;
+	color: rgb(180,180,180);
+}
+
+.bestellung_item td,th {
+	padding: 10px;
+}
+.bestellung_item td {
+	vertical-align: middle;
+}
+
+/*.bestellung_item img {
+	height: 100%;
+	width: auto;
+}*/
+
+.bestellung_item span:first-child {
+    font-size: 14pt;
+		/*color: black;*/
+		/*font-weight: bold;*/
+    display: block;
+		padding-bottom: 20px;
+}
+
+.bestellung_item span:nth-child(2) {
+	font-size: 14pt;
+	font-style: italic;
+	display: block;
+}
+
+td.bestellung_titel {
+    font-size: 18pt;
+    text-align: left;
+		padding: 15px;
+}
+
+.bestellung_titel a {
+    color: rgb(46,74,98);
+    text-decoration: none;
+}
+
+.media_button {
+	text-decoration: none;
+	background: rgb(46,74,98);
+	color: #fff;
+	margin-left: 25px;
+	border: 0;
+	border-radius: 2px;
+	min-width: 8em;
+	height: 1.75em;
+	font-size: 14pt;
+	font-family: "Futura Book", Helvetica, Arial, serif;
+	box-shadow: 0px 1px 1px 0px rgba(0, 0, 0, 0.12), 0px 0px 1px 0px rgba(0, 0, 0, 0.24);
+  cursor: pointer;
+	display: block;
+	text-align: center;
+	line-height: 1.75em;
+}
+
+.media_button:hover {
+	background: rgb(30,48,64);
+}
+
+.media_button:disabled {
+	background: rgb(200,200,200);
+    cursor: default;
+}
+
+.noborder {
+	border: 0px;
+}
 
 /*==================================================*/
 /*                   Footer                    		*/

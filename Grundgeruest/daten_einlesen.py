@@ -81,10 +81,7 @@ def veranstaltungen_aus_db():
             if zeile['type'] in ['seminar', 'salon']:
                 datum = zeile['start'] or '1111-01-01 00-00'
             else:
-                if zeile['last_donation'] in ['0000-00-00 00:00:00', None]:
-                    datum = '1111-01-01 00-00'
-                else:
-                    datum = zeile['last_donation']
+                datum = '1111-01-01 00-00'
                     
             datum = datum.split(' ')[0]
             v = Veranstaltung.objects.create(
@@ -116,7 +113,7 @@ def veranstaltungen_aus_db():
                 slug=zeile['id'],
                 beschreibung1=zeile['text'],
                 beschreibung2=zeile['text2'],
-                preis_teilnahme=zeile['price'],)
+                preis_buchung=zeile['price'],)
 
 
 def mitwirkende_aus_db():
@@ -306,7 +303,7 @@ def eintragen_studiendinger(daten):
                     slug=zeile['id'],
                     beschreibung1=zeile['text'],
                     beschreibung2=zeile['text2'],
-                    preis_teilnahme=zeile['price'],
+                    preis_buchung=zeile['price'],
                     reihenfolge=10*i,)
             if zeile['type'] == 'vortrag':
                 dings = Studiumdings.objects.create(
@@ -314,7 +311,7 @@ def eintragen_studiendinger(daten):
                     slug=zeile['id'],
                     beschreibung1=zeile['text'],
                     beschreibung2='Feld nicht genutzt',
-                    preis_teilnahme=zeile['price'],
+                    preis_buchung=zeile['price'],
                     reihenfolge=0,)
             
             id_zu_objekt[zeile['n']] = (dings, zeile['type'])
@@ -628,8 +625,7 @@ def mediendateien_einlesen():
         
         ob_feld = 'ob_aufzeichnung' if feldname=='datei' else 'ob_'+feldname
         def anschalten():
-            feld = getattr(objekt, ob_feld)
-            feld = True
+            feld = setattr(objekt, ob_feld, True)
             objekt.save()
 
         if dateifeld and os.path.isfile(os.path.join(MEDIA_ROOT, dateifeld.name)):

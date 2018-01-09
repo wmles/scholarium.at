@@ -194,7 +194,7 @@ class ScholariumProfile(UserenaBaseProfile):
     alt_mahnstufe = models.SmallIntegerField(
         default=0, null=True, editable=False)
     alt_auslaufend = models.SmallIntegerField(
-        default=0, null=True, editable=False)
+        default=0, null=True, editable=True, verbose_name='auslaufend')
     alt_gave_credits = models.SmallIntegerField(
         default=0, null=True, editable=False)
     alt_registration_ip = models.GenericIPAddressField(
@@ -221,8 +221,18 @@ class ScholariumProfile(UserenaBaseProfile):
                 return status[3]
 
     def guthaben_aufladen(self, betrag):
-        """ wird spaeter nuetzlich, wenn hier mehr als die eine Zeile^^ """
+        """ wird spaeter nuetzlich, wenn hier mehr als die eine Zeile^^ """        
         self.guthaben += int(betrag)
+        self.save()
+    
+    def adresse_ausgeben(self):
+        return """%s
+%s
+%s %s
+%s""" % (self.user.get_full_name(), self.strasse, self.plz, self.ort, self.land.name if self.land else '')
+
+    def __str__(self):
+        return 'Profil von %s (%s)' % (self.user.email, self.user.get_full_name())
 
     class Meta():
         verbose_name = 'Nutzerprofil'

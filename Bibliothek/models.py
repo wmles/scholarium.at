@@ -4,6 +4,7 @@
 
 from django.db import models
 from Produkte.models import KlasseMitProdukten
+from django.urls import reverse
 
 class Altes_Buch(KlasseMitProdukten):
     arten_liste = ['kaufen']
@@ -11,7 +12,7 @@ class Altes_Buch(KlasseMitProdukten):
         max_length=255,
         null=True, blank=True)
     def button_text(self, _):
-        return 'Auswählen!'
+        return 'Auswählen'
 
 
 class Buch(KlasseMitProdukten):
@@ -61,6 +62,9 @@ class Buch(KlasseMitProdukten):
     bild = models.ImageField(upload_to='buecher', null=True, blank=True)
     alte_nr = models.SmallIntegerField(null=True, editable=False)
 
+    def get_absolute_url(self):
+        return reverse('Bibliothek:detail_buch', kwargs={'slug': self.slug})
+
     def preis_ausgeben(self, art):
         if art=='leihen':
             return self.finde_preis(art) or 13
@@ -72,7 +76,7 @@ class Buch(KlasseMitProdukten):
             return self.finde_preis(art) or 20
 
     def button_text(self, art):
-        return '%s!' % art.capitalize()
+        return art.capitalize()
 
     def save(self, *args, **kwargs):
         if not self.bezeichnung:
@@ -85,8 +89,14 @@ class Buch(KlasseMitProdukten):
             return 'mit_menge'
         elif arten_attribute[art][0] and self.finde_anzahl(art) == 0:
             return 'verbergen'
-        else:
+        elif arten_attribute[art][0]: # beschränkt, genau eins
+            return 'ohne_menge'
+        elif getattr(self, 'ob_'+art) and bool(getattr(self, art)): # wenn unbeschränkt, gucke nach Datei und ob aktiviert
             return 'inline'
+        else:
+            return 'verbergen'
 
     class Meta:
         verbose_name_plural = 'Bücher'
+        verbose_name = 'Buch'
+        ordering = ['-zeit_erstellt']

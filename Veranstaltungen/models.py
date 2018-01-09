@@ -22,11 +22,24 @@ class Veranstaltung(KlasseMitProdukten):
     art_veranstaltung = models.ForeignKey('ArtDerVeranstaltung')
     datei = models.FileField(null=True, blank=True) # für Aufzeichnung
     link = models.URLField(null=True, blank=True) # youtube-link
-
+    ob_chat_anzeigen = models.BooleanField(default=False)
     arten_liste = ['teilnahme', 'livestream', 'aufzeichnung']
+
+    @property
+    def livestream(self):
+        return self.link
+    @property
+    def aufzeichnung(self):
+        return self.datei
 
     class Meta:
         verbose_name_plural = "Veranstaltungen"
+        verbose_name = "Veranstaltung"
+
+    def get_absolute_url(self):
+        art = self.art_veranstaltung.bezeichnung.lower()
+        prefix = 'vortrag' if art=='vorlesung' else art
+        return "/%s/%s/" % (prefix, self.slug)
 
     def preis_ausgeben(self, art='teilnahme'):
         """ Preis ausgeben, es gibt nur eine art für Präsenz? oder Medium-model hier einfügen, dann mehr? """
@@ -49,13 +62,6 @@ class Veranstaltung(KlasseMitProdukten):
         else:
             return ValueError('Art %s habe ich noch nicht beachtet' % art)
 
-
-    def get_url(self):
-        if self.art_veranstaltung.bezeichnung == 'Salon':
-            return '/salon/%s' % self.slug
-        elif self.art_veranstaltung.bezeichnung == 'Seminar':
-            return '/seminar/%s' % self.slug
-
     def __str__(self):
         return self.art_veranstaltung.bezeichnung+': '+self.bezeichnung
 
@@ -63,7 +69,7 @@ class Veranstaltung(KlasseMitProdukten):
         """ gibt Liste der art-Namen, die aktiv sind, zurück; also insb.
         leere Liste die in if-Abfrage False gibt """
         medien = [art for art in ['livestream', 'aufzeichnung']
-            if self.ob_aktiv(art)]
+            if self.anzeigemodus(art) != 'verbergen']
         return medien
 
     def embed_link(self):
@@ -83,11 +89,14 @@ class Studiumdings(KlasseMitProdukten):
     beschreibung1 = models.TextField()
     beschreibung2 = models.TextField()
     reihenfolge = models.SmallIntegerField(null=True)
-    arten_liste = ['teilnahme']
+    arten_liste = ['buchung']
     class Meta:
-        verbose_name_plural = "Studiendinger"
+        verbose_name_plural = "Studienprogramme"
+        verbose_name = "Studienprogramm"
         ordering = ['reihenfolge']
 
+    def get_absolute_url(self):
+        return reverse('studium_detail', kwargs={'slug': self.slug})
 
 class ArtDerVeranstaltung(Grundklasse):
     beschreibung = models.TextField(

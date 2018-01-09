@@ -32,9 +32,9 @@ urlpatterns = [
         TemplateMitMenue.as_view(
             template_name='Gast/fragen.html'),
         name='gast_fragen'),
-    url(r'^mitwirkende/',
-        ListeAktiveMitwirkende.as_view(),
-        name='gast_mitwirkende'),
+    # url(r'^mitwirkende/',
+    #     ListeAktiveMitwirkende.as_view(),
+    #     name='gast_mitwirkende'),
     url(r'^studium/$',
         ListeMitMenue.as_view(
             model=Studiumdings, # Achtung, es werden nur die studiendinger mit reihenfolge<>0 angezeigt, darüber auskommentieren!
@@ -46,6 +46,7 @@ urlpatterns = [
     url(r'^studium/(?P<slug>[-\w]+)/$',
         studiumdings_detail,
         name='studium_detail'),
+    url(r'^vortrag/(?P<slug>[-\w]+)/', vortrag, name='vortrag_detail'),
     url(r'^vortrag/', vortrag, name='vortrag'),
     url(r'^nutzer/', include(userena_urls)),
     url(r'^warenkorb/', include('Produkte.urls')),
@@ -82,6 +83,6 @@ urlpatterns = [
     url(r'^geheim_db$',
         db_runterladen,
         name='bitte_bald_loeschen'),
-    url(r'^', include('Grundgeruest.urls')),
     url(r'^nimda/', include('Workflow.urls')),
+    url(r'^', include('Grundgeruest.urls')),
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

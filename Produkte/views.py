@@ -10,9 +10,9 @@ from django.contrib import messages
 # Create your views here.
 
 from easycart import BaseCart, BaseItem
-from Grundgeruest.views import erstelle_liste_menue
+from Grundgeruest.views import erstelle_liste_menue, Nachricht
 from .models import Kauf, arten_attribute
-from Veranstaltungen.models import Veranstaltung
+from Veranstaltungen.models import Veranstaltung, Studiumdings
 
 """
 Integration des Pakets easycart - keine Modelle, über session Variablen
@@ -173,6 +173,7 @@ class Warenkorb(BaseCart):
         }
         if formatter:
             cart_repr = formatter(cart_repr)
+
         return JsonResponse(cart_repr)
 
     def create_items(self, session_items):
@@ -216,13 +217,17 @@ class Warenkorb(BaseCart):
             self._stale_pks = set(session_items).difference(items)
         return items
 
+    def was_zu_versand(self):
+        self.liste_zu_versand = []
+        for item in self.items.values():
+            if arten_attribute[item.art][0] and item.art not in ['teilnahme', 'buchung']: # wenn max. Anzahl angegeben
+                self.liste_zu_versand.append(item)
+        return self.liste_zu_versand
+
     @property
     def ob_versand(self):
-        for item in self.items.values():
-            if arten_attribute[item.art][0] and item.art != 'teilnahme': # wenn max. Anzahl angegeben
-                return True
-
-        return False
+        liste_versand = self.was_zu_versand()
+        return bool(liste_versand)
 
     def count_total_price(self):
         """ kopiert; berechnet die Summe. Änderung: addiere 5 wenn unter
@@ -265,14 +270,16 @@ def bestellungen(request):
             continue
 
         if (kauf.model_ausgeben() == 'veranstaltung' and
-            kauf.art_ausgeben() == 'teilnahme' and
-            kauf.tupel_aus_pk(kauf.pk_ausgeben())[1] in v_pks):
+            kauf.art_ausgeben() in ['teilnahme', 'livestream'] and
+            kauf.objekt_ausgeben().ist_zukunft()):
             kaeufe['teilnahmen'].append(kauf)
         elif kauf.art_ausgeben() in ['pdf', 'epub', 'mobi', 'aufzeichnung']:
             kaeufe['digital'].append(kauf)
+# wär nett das reinzunehmen, aber dafür download-button flexibler anzeigen:
+#        elif kauf.art_ausgeben() == 'livestream': # bleibt nur vergangen
+#            kaeufe['digital'].append(kauf)            
         else:
             kaeufe['rest'].append(kauf)
-
     return render(request,
         'Produkte/bestellungen.html',
         {'kaeufe': kaeufe, 'liste_menue': liste_menue})
@@ -284,9 +291,25 @@ def kaufen(request):
         messages.error(request, 'Ihr Guthaben reicht leider nicht aus. Laden Sie ihr Guthaben auf, indem Sie ihre Unterstützung erneuern.')
         return HttpResponseRedirect(reverse('Produkte:warenkorb'))
 
+    if warenkorb.ob_versand:
+        request.user.my_profile.guthaben += -5
+        Nachricht.bestellung_versenden(request)
+    ob_studien = ob_teilnahmen = False
     for pk, ware in list(warenkorb.items.items()):
-        Kauf.kauf_ausfuehren(nutzer, pk, ware)
+        kauf = Kauf.kauf_ausfuehren(nutzer, pk, ware)
+        if kauf is None: # Rückgabewert wenn Menge nicht gereicht hat
+            messages.error(request, 'Entschuldigung, die Menge des Produktes reicht für den Kauf nicht aus.')
+            return HttpResponseRedirect(reverse('Produkte:warenkorb'))
+        objekt = kauf.objekt_ausgeben()
+        if isinstance(objekt, Studiumdings):
+            ob_studien = True
+        if isinstance(objekt, Veranstaltung) and kauf.art_ausgeben()=='teilnahme':
+            ob_teilnahmen = True
 
+    if ob_studien:
+        Nachricht.studiumdings_gebucht(request)
+    if ob_teilnahmen:
+        Nachricht.teilnahme_gebucht(request)        
     warenkorb.empty()
 
     return HttpResponseRedirect(reverse('Produkte:bestellungen'))

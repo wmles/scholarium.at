@@ -6,15 +6,16 @@ from django.db import models
 from django.template.defaultfilters import slugify
 
 class Grundklasse(models.Model):
-    bezeichnung = models.CharField(max_length=30)
+    bezeichnung = models.CharField(max_length=200)
     slug = models.SlugField(
-        max_length=30, 
-        null=False, 
-        blank=True)
+        max_length=100,
+        null=False,
+        blank=True,
+        unique=True)
     zeit_erstellt = models.DateTimeField(
         auto_now_add=True,
         editable=False)
-    
+
     def save(self, **kwargs):
         if not self.slug:
             self.slug = slugify(self.bezeichnung)
@@ -25,4 +26,3 @@ class Grundklasse(models.Model):
 
     class Meta:
         abstract = True
-    

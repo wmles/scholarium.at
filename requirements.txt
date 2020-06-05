@@ -6,7 +6,7 @@ cffi==1.9.1
 chardet==3.0.4
 cryptography==2.0.3
 decorator==4.1.2
-Django==1.9.11
+Django==1.11.29
 django-countries==4.5
 django-easycart==0.4.0
 django-extensions==1.7.5
